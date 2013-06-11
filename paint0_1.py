@@ -135,9 +135,22 @@ def main():
             started_line = get_exact_mouse_pos()
         elif tool.mode == Tool.ELLIPSE_MODE:
           if started_line:
-            x, y = get_exact_mouse_pos()
-            w, h = started_line
-            pygame.draw.ellipse(canvas, tool.draw_color, pygame.Rect(started_line, (x - w, y - h)))
+            m_x, m_y = get_exact_mouse_pos()
+            st_x, st_y = started_line
+            rect_width = m_x - st_x
+            rect_height = m_y - st_y
+            if rect_width < 0:
+              rect_width = ~rect_width
+              st_x = st_x - rect_width
+            if rect_height < 0:
+              rect_height = ~rect_height
+              st_y = st_y - rect_height
+
+            started_line = (st_x, st_y)
+            rect_size = (rect_width, rect_height)
+
+            ellipse_rect = pygame.Rect(started_line, rect_size)
+            pygame.draw.ellipse(canvas, tool.draw_color, ellipse_rect)
             started_line = False
           else:
             started_line = get_exact_mouse_pos()

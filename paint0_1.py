@@ -15,7 +15,7 @@ class Canvas(pygame.Surface):
   def clear(self):
     self.fill((255,255,255))
 
-class Pen:
+class Tool:
   BLACK = (0, 0, 0)
   RED = (255, 0, 0)
   GREEN = (0, 255, 0)
@@ -23,20 +23,20 @@ class Pen:
   BLUE = (0, 0, 255)
   def __init__(self):
     self.line_width = 1
-    self.draw_color = Pen.BLACK
+    self.draw_color = Tool.BLACK
 
   def check_key_pressed(self, key_pressed):
     # Draw Colors
     if key_pressed == pygame.K_r:
-      self.draw_color = Pen.RED
+      self.draw_color = Tool.RED
     elif key_pressed == pygame.K_g:
-      self.draw_color = Pen.GREEN
+      self.draw_color = Tool.GREEN
     elif key_pressed == pygame.K_w:
-      self.draw_color = Pen.WHITE
+      self.draw_color = Tool.WHITE
     elif key_pressed == pygame.K_b:
-      self.draw_color = Pen.BLUE
+      self.draw_color = Tool.BLUE
     elif key_pressed == pygame.K_k:
-      self.draw_color = Pen.BLACK
+      self.draw_color = Tool.BLACK
 
     #line widths
     elif key_pressed == pygame.K_1:
@@ -65,7 +65,7 @@ def main():
   pygame.init()
   canvas = Canvas(MAIN_WIDTH, MAIN_HEIGHT - STRIP_HEIGHT)
   screen = pygame.display.set_mode(MAIN_SIZE)
-  pen = Pen()
+  tool = Tool()
   pygame.display.set_caption(MAIN_TITLE)
 
   frame_clock = pygame.time.Clock()
@@ -93,7 +93,7 @@ def main():
           #load picture
           canvas = pygame.image.load("painting.bmp")
         else:
-          pen.check_key_pressed(event.key)
+          tool.check_key_pressed(event.key)
 
     screen.blit(canvas, (0, STRIP_HEIGHT))
     pygame.display.flip()

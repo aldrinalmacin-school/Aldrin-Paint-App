@@ -30,6 +30,7 @@ class Tool:
   PENCIL = 1
   LINE = 2
   AIR_BRUSH = 3
+  ELLIPSE_MODE = 4
   def __init__(self):
     self.line_width = 1
     self.draw_color = Tool.BLACK
@@ -75,9 +76,15 @@ class Tool:
       self.mode = Tool.LINE
     elif key_pressed == pygame.K_a:
       self.mode = Tool.AIR_BRUSH
+    elif key_pressed == pygame.K_e:
+      self.mode = Tool.ELLIPSE_MODE
 
     print "Line width: ", self.line_width
     print "Color: ", self.draw_color
+
+def get_exact_mouse_pos():
+  x,y = pygame.mouse.get_pos()
+  return (x, y - STRIP_HEIGHT)
 
 def main():
   pygame.init()
@@ -85,7 +92,7 @@ def main():
   screen = pygame.display.set_mode(MAIN_SIZE)
   tool = Tool()
   pygame.display.set_caption(MAIN_TITLE)
-  line_start = (0, 0)
+  line_start = (0, STRIP_HEIGHT)
   started_line = False
 
   frame_clock = pygame.time.Clock()
@@ -97,37 +104,44 @@ def main():
       if event.type == pygame.QUIT:
         game_running = False
       elif event.type == pygame.MOUSEMOTION:
-        if tool.mode == Tool.PENCIL:
-          line_end = pygame.mouse.get_pos()
-          if pygame.mouse.get_pressed() == (1, 0, 0):
+        line_end = get_exact_mouse_pos()
+
+        if pygame.mouse.get_pressed() == (1, 0, 0):
+          if tool.mode == Tool.PENCIL:
             pygame.draw.line(canvas, tool.draw_color, line_start, line_end, tool.line_width)
-          line_start = line_end
-        elif tool.mode == Tool.AIR_BRUSH:
-          line_end = pygame.mouse.get_pos()
-          if pygame.mouse.get_pressed() == (1, 0, 0):
-            for x in range(0, 50):
-              x, y = pygame.mouse.get_pos()
+          elif tool.mode == Tool.AIR_BRUSH:
+            if pygame.mouse.get_pressed() == (1, 0, 0):
+              num_of_sprays = tool.line_width * 10
+              spray_area_size = tool.line_width * 5
+              for x in range(0, num_of_sprays):
+                x, y = get_exact_mouse_pos()
 
-              t = 2 * math.pi * random.random()
-              u = random.random() + random.random()
-              if u > 1:
-                r = 2 - u
-              else:
-                r = u
-              position = (int((r * math.cos(t) * (tool.line_width * 10)) + x), int((r * math.sin(t) * (tool.line_width * 10)) + y))
+                t = 2 * math.pi * random.random()
+                u = random.random() + random.random()
+                if u > 1:
+                  r = 2 - u
+                else:
+                  r = u
+                position = (int((r * math.cos(t) * spray_area_size) + x), int((r * math.sin(t) * spray_area_size) + y))
+                pygame.draw.circle(canvas, tool.draw_color, position, 1)
 
-              print position
-
-              pygame.draw.circle(canvas, tool.draw_color, position, tool.line_width)
-
-          line_start = line_end
+        line_start = line_end
       if event.type == pygame.MOUSEBUTTONUP:
         if tool.mode == Tool.LINE:
           if started_line:
-            pygame.draw.line(canvas, tool.draw_color, started_line, pygame.mouse.get_pos(), tool.line_width)
+            pygame.draw.line(canvas, tool.draw_color, started_line, get_exact_mouse_pos(), tool.line_width)
             started_line = False
           else:
-            started_line = pygame.mouse.get_pos()
+            started_line = get_exact_mouse_pos()
+        elif tool.mode == Tool.ELLIPSE_MODE:
+          if started_line:
+            x, y = get_exact_mouse_pos()
+            w, h = started_line
+            pygame.draw.ellipse(canvas, tool.draw_color, pygame.Rect(started_line, (x - w, y - h)))
+            started_line = False
+          else:
+            started_line = get_exact_mouse_pos()
+
       elif event.type == pygame.KEYDOWN:
         if event.key == pygame.K_q:
           print "Quit the game"

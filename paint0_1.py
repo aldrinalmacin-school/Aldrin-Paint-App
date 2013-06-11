@@ -10,7 +10,7 @@ class Canvas(pygame.Surface):
   def __init__(self, width, height):
     pygame.Surface.__init__(self, (width, height))
     self.size = (width, height)
-    self.fill((255,255,255))
+    self.clear()
 
   def clear(self):
     self.fill((255,255,255))

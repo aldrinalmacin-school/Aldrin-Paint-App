@@ -1,4 +1,6 @@
 import pygame
+import random
+import math
 
 MAIN_WIDTH = 600
 MAIN_HEIGHT = 500
@@ -27,6 +29,7 @@ class Tool:
 
   PENCIL = 1
   LINE = 2
+  AIR_BRUSH = 3
   def __init__(self):
     self.line_width = 1
     self.draw_color = Tool.BLACK
@@ -70,6 +73,8 @@ class Tool:
       self.mode = Tool.PENCIL
     elif key_pressed == pygame.K_i:
       self.mode = Tool.LINE
+    elif key_pressed == pygame.K_a:
+      self.mode = Tool.AIR_BRUSH
 
     print "Line width: ", self.line_width
     print "Color: ", self.draw_color
@@ -96,6 +101,25 @@ def main():
           line_end = pygame.mouse.get_pos()
           if pygame.mouse.get_pressed() == (1, 0, 0):
             pygame.draw.line(canvas, tool.draw_color, line_start, line_end, tool.line_width)
+          line_start = line_end
+        elif tool.mode == Tool.AIR_BRUSH:
+          line_end = pygame.mouse.get_pos()
+          if pygame.mouse.get_pressed() == (1, 0, 0):
+            for x in range(0, 50):
+              x, y = pygame.mouse.get_pos()
+
+              t = 2 * math.pi * random.random()
+              u = random.random() + random.random()
+              if u > 1:
+                r = 2 - u
+              else:
+                r = u
+              position = (int((r * math.cos(t) * (tool.line_width * 10)) + x), int((r * math.sin(t) * (tool.line_width * 10)) + y))
+
+              print position
+
+              pygame.draw.circle(canvas, tool.draw_color, position, tool.line_width)
+
           line_start = line_end
       if event.type == pygame.MOUSEBUTTONUP:
         if tool.mode == Tool.LINE:

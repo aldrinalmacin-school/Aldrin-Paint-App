@@ -4,6 +4,7 @@ class Canvas(pygame.Surface):
   def __init__(self, width, height):
     pygame.Surface.__init__(self, (width, height))
     self.size = (width, height)
+    self.fill((255,255,255))
 
   def clear(self):
     self.fill((255,255,255))
@@ -18,7 +19,6 @@ def main():
   game_running = True
   while(game_running):
     frame_clock.tick(30)
-    canvas.clear()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

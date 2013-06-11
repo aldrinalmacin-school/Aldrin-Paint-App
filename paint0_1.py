@@ -15,15 +15,21 @@ class Canvas(pygame.Surface):
   def clear(self):
     self.fill((255,255,255))
 
+  def load_image(self, image):
+    self.blit(image, (0,0))
+
 class Tool:
   BLACK = (0, 0, 0)
   RED = (255, 0, 0)
   GREEN = (0, 255, 0)
   WHITE = (255, 255, 255)
   BLUE = (0, 0, 255)
+
+  PENCIL = 1
   def __init__(self):
     self.line_width = 1
     self.draw_color = Tool.BLACK
+    self.mode = Tool.PENCIL
 
   def check_key_pressed(self, key_pressed):
     # Draw Colors
@@ -67,6 +73,7 @@ def main():
   screen = pygame.display.set_mode(MAIN_SIZE)
   tool = Tool()
   pygame.display.set_caption(MAIN_TITLE)
+  line_start = (0, 0)
 
   frame_clock = pygame.time.Clock()
   game_running = True
@@ -76,6 +83,12 @@ def main():
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
         game_running = False
+      elif event.type == pygame.MOUSEMOTION:
+        if tool.mode == Tool.PENCIL:
+          line_end = pygame.mouse.get_pos()
+          if pygame.mouse.get_pressed() == (1, 0, 0):
+            pygame.draw.line(canvas, tool.draw_color, line_start, line_end, tool.line_width)
+          line_start = line_end
       elif event.type == pygame.KEYDOWN:
         if event.key == pygame.K_q:
           print "Quit the game"
@@ -91,7 +104,7 @@ def main():
         elif event.key == pygame.K_l:
           print "Load the Drawing"
           #load picture
-          canvas = pygame.image.load("painting.bmp")
+          canvas.load_image(pygame.image.load("painting.bmp"))
         else:
           tool.check_key_pressed(event.key)
 

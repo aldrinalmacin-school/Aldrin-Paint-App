@@ -26,6 +26,7 @@ class Tool:
   BLUE = (0, 0, 255)
 
   PENCIL = 1
+  LINE = 2
   def __init__(self):
     self.line_width = 1
     self.draw_color = Tool.BLACK
@@ -64,6 +65,12 @@ class Tool:
     elif key_pressed == pygame.K_9:
       self.line_width = 9
 
+    #modes
+    elif key_pressed == pygame.K_p:
+      self.mode = Tool.PENCIL
+    elif key_pressed == pygame.K_i:
+      self.mode = Tool.LINE
+
     print "Line width: ", self.line_width
     print "Color: ", self.draw_color
 
@@ -74,6 +81,7 @@ def main():
   tool = Tool()
   pygame.display.set_caption(MAIN_TITLE)
   line_start = (0, 0)
+  started_line = False
 
   frame_clock = pygame.time.Clock()
   game_running = True
@@ -89,6 +97,13 @@ def main():
           if pygame.mouse.get_pressed() == (1, 0, 0):
             pygame.draw.line(canvas, tool.draw_color, line_start, line_end, tool.line_width)
           line_start = line_end
+      if event.type == pygame.MOUSEBUTTONUP:
+        if tool.mode == Tool.LINE:
+          if started_line:
+            pygame.draw.line(canvas, tool.draw_color, started_line, pygame.mouse.get_pos(), tool.line_width)
+            started_line = False
+          else:
+            started_line = pygame.mouse.get_pos()
       elif event.type == pygame.KEYDOWN:
         if event.key == pygame.K_q:
           print "Quit the game"

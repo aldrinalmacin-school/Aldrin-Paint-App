@@ -1,17 +1,17 @@
-""" paint.py 
+""" paint.py
     a simple paint program"""
 
 import pygame
-    
+
 def checkKeys(myData):
     """test for various keyboard inputs"""
-    
+
     #extract the data
     (event, background, drawColor, lineWidth, keepGoing) = myData
     #print myData
-    
+
     if event.key == pygame.K_q:
-        #quit    
+        #quit
         keepGoing = False
     elif event.key == pygame.K_c:
         #clear screen
@@ -58,7 +58,7 @@ def checkKeys(myData):
     elif event.key == pygame.K_9:
         lineWidth = 9
 
-    #return all values 
+    #return all values
     myData = (event, background, drawColor, lineWidth, keepGoing)
     return myData
 
@@ -73,19 +73,22 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
     pygame.display.set_caption("Paint:  (r)ed, (g)reen, (b)lue, (w)hite, blac(k), (1-9) width, (c)lear, (s)ave, (l)oad, (q)uit")
-    
+
     background = pygame.Surface(screen.get_size())
     background.fill((255, 255, 255))
-    
+
+    toolStrip = pygame.Surface((640, 30))
+    toolStrip.fill((100, 100, 100))
+
     clock = pygame.time.Clock()
     keepGoing = True
     lineStart = (0, 0)
     drawColor = (0, 0, 0)
     lineWidth = 3
-    
+
     while keepGoing:
         clock.tick(30)
-        
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 keepGoing = False
@@ -99,6 +102,7 @@ def main():
                 myData = checkKeys(myData)
                 (event, background, drawColor, lineWidth, keepGoing) = myData
         screen.blit(background, (0, 0))
+        screen.blit(toolStrip, (0, 0))
         myLabel = showStats(drawColor, lineWidth)
         screen.blit(myLabel, (450, 450))
         pygame.display.flip()

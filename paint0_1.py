@@ -101,6 +101,27 @@ class Tool:
       position = (int((r * math.cos(t) * spray_area_size) + x), int((r * math.sin(t) * spray_area_size) + y))
       pygame.draw.circle(canvas, self.draw_color, position, 1)
 
+  def draw_ellipse(self, canvas, started_line):
+    m_x, m_y = get_exact_mouse_pos()
+    st_x, st_y = started_line
+    rect_width = m_x - st_x
+    rect_height = m_y - st_y
+    if rect_width < 0:
+      rect_width = ~rect_width
+      st_x = st_x - rect_width
+    if rect_height < 0:
+      rect_height = ~rect_height
+      st_y = st_y - rect_height
+
+    started_line = (st_x, st_y)
+    rect_size = (rect_width, rect_height)
+
+    ellipse_rect = pygame.Rect(started_line, rect_size)
+    pygame.draw.ellipse(canvas, self.draw_color, ellipse_rect)
+
+  def draw_line(self, canvas, started_line):
+    pygame.draw.line(canvas, self.draw_color, started_line, get_exact_mouse_pos(), self.line_width)
+
 def get_exact_mouse_pos():
   x,y = pygame.mouse.get_pos()
   return (x, y - STRIP_HEIGHT)
@@ -130,34 +151,24 @@ def main():
           elif tool.mode == Tool.AIR_BRUSH:
             tool.draw_airbrush(canvas)
         line_start = line_end
+        if tool.mode == Tool.ELLIPSE_MODE and started_line:
+          canvas.load_image(pygame.image.load("temp_paint.bmp"))
+          tool.draw_ellipse(canvas, started_line)
+        elif tool.mode == Tool.LINE and started_line:
+          canvas.load_image(pygame.image.load("temp_paint.bmp"))
+          tool.draw_line(canvas, started_line)
+
 
       if event.type == pygame.MOUSEBUTTONUP:
-        if tool.mode == Tool.LINE:
           if started_line:
-            pygame.draw.line(canvas, tool.draw_color, started_line, get_exact_mouse_pos(), tool.line_width)
+            if tool.mode == Tool.LINE:
+              tool.draw_line(canvas, started_line)
+            elif tool.mode == Tool.ELLIPSE_MODE:
+              tool.draw_ellipse(canvas, started_line)
+
             started_line = False
           else:
-            started_line = get_exact_mouse_pos()
-        elif tool.mode == Tool.ELLIPSE_MODE:
-          if started_line:
-            m_x, m_y = get_exact_mouse_pos()
-            st_x, st_y = started_line
-            rect_width = m_x - st_x
-            rect_height = m_y - st_y
-            if rect_width < 0:
-              rect_width = ~rect_width
-              st_x = st_x - rect_width
-            if rect_height < 0:
-              rect_height = ~rect_height
-              st_y = st_y - rect_height
-
-            started_line = (st_x, st_y)
-            rect_size = (rect_width, rect_height)
-
-            ellipse_rect = pygame.Rect(started_line, rect_size)
-            pygame.draw.ellipse(canvas, tool.draw_color, ellipse_rect)
-            started_line = False
-          else:
+            pygame.image.save(canvas, "temp_paint.bmp")
             started_line = get_exact_mouse_pos()
 
       elif event.type == pygame.KEYDOWN:

@@ -82,6 +82,25 @@ class Tool:
     print "Line width: ", self.line_width
     print "Color: ", self.draw_color
 
+  def draw_pencil(self, canvas, line_start, line_end):
+    pygame.draw.line(canvas, self.draw_color, line_start, line_end, self.line_width)
+
+  def draw_airbrush(self, canvas):
+    num_of_sprays = self.line_width * 10
+    spray_area_size = self.line_width * 5
+
+    for x in range(0, num_of_sprays):
+      x, y = get_exact_mouse_pos()
+
+      t = 2 * math.pi * random.random()
+      u = random.random() + random.random()
+      if u > 1:
+        r = 2 - u
+      else:
+        r = u
+      position = (int((r * math.cos(t) * spray_area_size) + x), int((r * math.sin(t) * spray_area_size) + y))
+      pygame.draw.circle(canvas, self.draw_color, position, 1)
+
 def get_exact_mouse_pos():
   x,y = pygame.mouse.get_pos()
   return (x, y - STRIP_HEIGHT)
@@ -105,27 +124,13 @@ def main():
         game_running = False
       elif event.type == pygame.MOUSEMOTION:
         line_end = get_exact_mouse_pos()
-
         if pygame.mouse.get_pressed() == (1, 0, 0):
           if tool.mode == Tool.PENCIL:
-            pygame.draw.line(canvas, tool.draw_color, line_start, line_end, tool.line_width)
+            tool.draw_pencil(canvas, line_start, line_end)
           elif tool.mode == Tool.AIR_BRUSH:
-            if pygame.mouse.get_pressed() == (1, 0, 0):
-              num_of_sprays = tool.line_width * 10
-              spray_area_size = tool.line_width * 5
-              for x in range(0, num_of_sprays):
-                x, y = get_exact_mouse_pos()
-
-                t = 2 * math.pi * random.random()
-                u = random.random() + random.random()
-                if u > 1:
-                  r = 2 - u
-                else:
-                  r = u
-                position = (int((r * math.cos(t) * spray_area_size) + x), int((r * math.sin(t) * spray_area_size) + y))
-                pygame.draw.circle(canvas, tool.draw_color, position, 1)
-
+            tool.draw_airbrush(canvas)
         line_start = line_end
+
       if event.type == pygame.MOUSEBUTTONUP:
         if tool.mode == Tool.LINE:
           if started_line:

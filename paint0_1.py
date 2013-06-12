@@ -27,14 +27,16 @@ class Tool:
   WHITE = (255, 255, 255)
   BLUE = (0, 0, 255)
 
-  PENCIL = 1
-  LINE = 2
-  AIR_BRUSH = 3
-  ELLIPSE_MODE = 4
+  PENCIL = "Pencil"
+  LINE = "Line"
+  AIR_BRUSH = "Air Brush"
+  ELLIPSE_MODE = "Ellipse"
+  RECTANGLE_MODE = "Rectangle"
   def __init__(self):
     self.line_width = 1
     self.draw_color = Tool.BLACK
     self.mode = Tool.PENCIL
+    self.width_fill = self.line_width
 
   def check_key_pressed(self, key_pressed):
     # Draw Colors
@@ -78,6 +80,13 @@ class Tool:
       self.mode = Tool.AIR_BRUSH
     elif key_pressed == pygame.K_e:
       self.mode = Tool.ELLIPSE_MODE
+    elif key_pressed == pygame.K_t:
+      self.mode = Tool.RECTANGLE_MODE
+    elif key_pressed == pygame.K_f:
+      if self.width_fill > 0:
+        self.width_fill = 0
+      else:
+        self.width_fill = self.line_width
 
     print "Line width: ", self.line_width
     print "Color: ", self.draw_color
@@ -101,7 +110,9 @@ class Tool:
       position = (int((r * math.cos(t) * spray_area_size) + x), int((r * math.sin(t) * spray_area_size) + y))
       pygame.draw.circle(canvas, self.draw_color, position, 1)
 
-  def draw_ellipse(self, canvas, started_line):
+  def draw_shape(self, started_line):
+    if self.width_fill != 0:
+      self.width_fill = self.line_width
     m_x, m_y = get_exact_mouse_pos()
     st_x, st_y = started_line
     rect_width = m_x - st_x
@@ -116,8 +127,17 @@ class Tool:
     started_line = (st_x, st_y)
     rect_size = (rect_width, rect_height)
 
-    ellipse_rect = pygame.Rect(started_line, rect_size)
-    pygame.draw.ellipse(canvas, self.draw_color, ellipse_rect)
+    return pygame.Rect(started_line, rect_size)
+
+  def draw_ellipse(self, canvas, started_line):
+    ellipse_rect = self.draw_shape(started_line)
+    r_width, r_height = ellipse_rect.size
+    if r_width > self.line_width * 6 and r_height > self.line_width * 6:
+      pygame.draw.ellipse(canvas, self.draw_color, ellipse_rect, self.width_fill)
+
+  def draw_rect(self, canvas, started_line):
+    rectangle_rect = self.draw_shape(started_line)
+    pygame.draw.rect(canvas, self.draw_color, rectangle_rect, self.width_fill)
 
   def draw_line(self, canvas, started_line):
     pygame.draw.line(canvas, self.draw_color, started_line, get_exact_mouse_pos(), self.line_width)
@@ -151,12 +171,15 @@ def main():
           elif tool.mode == Tool.AIR_BRUSH:
             tool.draw_airbrush(canvas)
         line_start = line_end
-        if tool.mode == Tool.ELLIPSE_MODE and started_line:
+
+        if started_line:
           canvas.load_image(pygame.image.load("temp_paint.bmp"))
-          tool.draw_ellipse(canvas, started_line)
-        elif tool.mode == Tool.LINE and started_line:
-          canvas.load_image(pygame.image.load("temp_paint.bmp"))
-          tool.draw_line(canvas, started_line)
+          if tool.mode == Tool.ELLIPSE_MODE:
+            tool.draw_ellipse(canvas, started_line)
+          elif tool.mode == Tool.LINE:
+            tool.draw_line(canvas, started_line)
+          elif tool.mode == Tool.RECTANGLE_MODE:
+            tool.draw_rect(canvas, started_line)
 
 
       if event.type == pygame.MOUSEBUTTONUP:
@@ -165,6 +188,8 @@ def main():
               tool.draw_line(canvas, started_line)
             elif tool.mode == Tool.ELLIPSE_MODE:
               tool.draw_ellipse(canvas, started_line)
+            elif tool.mode == Tool.RECTANGLE_MODE:
+              tool.draw_rect(canvas, started_line)
 
             started_line = False
           else:
